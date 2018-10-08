@@ -58,11 +58,11 @@ mem_realloc_medium() {
 			     MAP_PRIVATE | MAP_ANONYMOUS,
 			     -1,
 			     0);
+    if (arena.TZL[indice] == MAP_FAILED)
+	handle_fatalError("medium realloc");
     // align allocation to a multiple of the size
     // for buddy algo
     arena.TZL[indice] += (size - (((intptr_t)arena.TZL[indice]) % size));
-    if (arena.TZL[indice] == MAP_FAILED && arena.TZL[indice] == 0)
-	handle_fatalError("medium realloc");
     arena.medium_next_exponant++;
     return size; // lie on allocation size, but never free
 }
