@@ -1,4 +1,4 @@
-#include <python3.5m/Python.h>
+#include <Python.h>
 #include "../src/mem.h"
 
 static PyObject *

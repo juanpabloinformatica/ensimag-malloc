@@ -7,7 +7,7 @@ project(emalloc)
 enable_testing()
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Werror -std=gnu11")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -std=gnu++11")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -std=gnu++14")
 
 #########
 # Vous devez editer la ligne suivante pour y mettre vos logins
@@ -44,6 +44,17 @@ else(EXISTS /usr/src/gtest)
     include_directories(${GTEST_INCLUDE_DIRS})
   endif(EXISTS /usr/bin/gtest-config)
 endif(EXISTS /usr/src/gtest)
+
+##
+# Recherche du répertoire avec les headers python
+##
+if(EXISTS /usr/include/python3.6m/Python.h)
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -I/usr/include/python3.6m")
+else(EXISTS /usr/include/python3.6m/Python.h)
+  if (EXISTS /usr/include/python3.8/Python.h)
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -I/usr/include/python3.8")
+  endif (EXISTS /usr/include/python3.8/Python.h)
+endif(EXISTS /usr/include/python3.6m/Python.h)
 
 ##
 # Si vous utilisé plusieurs fichiers, en plus de mem.c et les autres,
