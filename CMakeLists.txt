@@ -48,10 +48,13 @@ endif(EXISTS /usr/src/gtest)
 ##
 # Recherche du répertoire avec les headers python
 ##
-find_package(Python COMPONENTS Development)
-if (Python_Development_FOUND)
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -I${Python_INCLUDE_DIRS}")
-endif (Python_Development_FOUND)
+execute_process(COMMAND pkg-config --cflags python3 OUTPUT_VARIABLE python_header OUTPUT_STRIP_TRAILING_WHITESPACE)
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${python_header}")
+# You can use this solution when cmake is updated to 3.12
+#find_package(Python3 COMPONENTS Development)
+#if (Python_Development_FOUND)
+#  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -I${Python_INCLUDE_DIRS}")
+#endif (Python_Development_FOUND)
 
 ##
 # Si vous utilisé plusieurs fichiers, en plus de mem.c et les autres,
