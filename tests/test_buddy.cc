@@ -1,5 +1,5 @@
 /******************************************************
- * Copyright Grégory Mounié 2008-2018                 *
+ * Copyright Grégory Mounié 2008-2022                 *
  * This code is distributed under the GLPv3+ licence. *
  * Ce code est distribué sous la licence GPLv3+.      *
  ******************************************************/
@@ -16,17 +16,19 @@ TEST(Medium,buddy) {
   void *mref = emalloc(ALLOC_MEM_SIZE); // first allocation
   ASSERT_NE( mref, (void*) 0);
   memset(mref, 1, ALLOC_MEM_SIZE);
+  ASSERT_EQ( nb_TZL_entries(), 0U);
   efree(mref);
-  ASSERT_NE( nb_TZL_entries(), 1U);
-  
+  ASSERT_EQ( nb_TZL_entries(), 1U);
+
   void *mref2 = emalloc(ALLOC_MEM_SIZE); // again, should give same address
   ASSERT_NE( mref2, (void*) 0);
   ASSERT_EQ( mref2, mref ); // both allocation should give same address
+  ASSERT_EQ( nb_TZL_entries(), 0U);
   efree(mref2);
-  ASSERT_NE( nb_TZL_entries(), 1U);  
+  ASSERT_EQ( nb_TZL_entries(), 1U);
 
-  // Next two allocations should be buddys of 128 Bytes 
-  void *m1 = emalloc(65); 
+  // Next two allocations should be buddys of 128 Bytes
+  void *m1 = emalloc(65);
   ASSERT_NE( m1, (void *)0 );
   memset( m1, 1, 65);
 
@@ -41,14 +43,14 @@ TEST(Medium,buddy) {
 
   efree(m1);
   efree(m2);
-  ASSERT_NE( nb_TZL_entries(), 1U);  
+  ASSERT_EQ( nb_TZL_entries(), 1U);
 
   // after fusion, the merge allow to get back the same full block
   void *mref3 = emalloc(ALLOC_MEM_SIZE);
   ASSERT_NE( mref3, (void *)0 );
   memset(mref3, 1, ALLOC_MEM_SIZE);
   ASSERT_EQ( mref3, mref );
-
+  ASSERT_EQ( nb_TZL_entries(), 0U);
   efree(mref3);
-  ASSERT_NE( nb_TZL_entries(), 1U);
+  ASSERT_EQ( nb_TZL_entries(), 1U);
 }

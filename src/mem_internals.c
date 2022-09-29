@@ -1,5 +1,5 @@
 /******************************************************
- * Copyright Grégory Mounié 2018                      *
+ * Copyright Grégory Mounié 2018-2022                 *
  * This code is distributed under the GLPv3+ licence. *
  * Ce code est distribué sous la licence GPLv3+.      *
  ******************************************************/
@@ -51,7 +51,7 @@ mem_realloc_medium() {
     uint32_t indice = FIRST_ALLOC_MEDIUM_EXPOSANT + arena.medium_next_exponant;
     assert(arena.TZL[indice] == 0);
     unsigned long size = (FIRST_ALLOC_MEDIUM << arena.medium_next_exponant);
-    assert( size == (1 << indice));
+    assert( size == (1UL << indice));
     arena.TZL[indice] = mmap(0,
 			     size*2, // twice the size to allign
 			     PROT_READ | PROT_WRITE | PROT_EXEC,
