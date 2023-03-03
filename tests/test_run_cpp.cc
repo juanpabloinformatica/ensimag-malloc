@@ -1,5 +1,5 @@
 /*****************************************************
- * Copyright Grégory Mounié 2008-2013                *
+ * Copyright Grégory Mounié 2008-2022                *
  * This code is distributed under the GLPv3 licence. *
  * Ce code est distribué sous la licence GPLv3+.     *
  *****************************************************/
@@ -78,7 +78,7 @@ void random_run_cpp(bool verbose=false)
     vector<allocat> liste_allocation;
     
     /* choisir les allocations */
-    fillList_fibo<FIRST_ALLOC_MEDIUM*16> ( liste_allocation );
+    fillList_fibo<FIRST_ALLOC_MEDIUM/16> ( liste_allocation );
     
     /* afficher l'etat de la memoire */
     
