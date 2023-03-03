@@ -67,7 +67,10 @@ add_library(emalloc SHARED src/mem.c src/mem_internals.c src/mem_small.c src/mem
 ##
 
 add_library(mempy SHARED tests/mempymodule.c)
+target_include_directories(mempy PRIVATE src)
+target_include_directories(mempy PRIVATE ${PYTHON_INCLUDE_DIRS})
 target_link_libraries(mempy emalloc)
+target_link_libraries(mempy ${PYTHON_LIBRARIES})
 
 ##
 # Construction du programme de tests unitaires
