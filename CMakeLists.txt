@@ -1,82 +1,58 @@
-cmake_minimum_required(VERSION 2.8.12)
-if(COMMAND cmake_policy)
-  cmake_policy(SET CMP0003 NEW)
-endif(COMMAND cmake_policy)
+cmake_minimum_required(VERSION 3.20)
+####
+# The version number in previous line may be reduced if needed.
+####
 
-project(emalloc)
-enable_testing()
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Werror -std=gnu11")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -std=gnu++14")
+project(ensimalloc)
 
 #########
-# Vous devez editer la ligne suivante pour y mettre vos logins
+# Gestion des équipes et variante du sujet / Team management and addition
 #########
-set(VARIANTE_LOGINS login1 login2 login3)
-###
-
-list(SORT VARIANTE_LOGINS)
-if (VARIANTE_LOGINS MATCHES "login[123]")
-  message(FATAL_ERROR "** ERREUR **: Vous devez modifier CMakeLists.txt pour y mettre vos logins")
+if (EXISTS ${CMAKE_SOURCE_DIR}/AUTHORS)
+  message(STATUS "Les auteurs du TP incrits dans AUTHORS sont / AUTHORS are:")
+  execute_process (COMMAND cat AUTHORS WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+else()
+  message(FATAL_ERROR "** ERREUR / ERROR **: Vous devez mettre vos prénoms, noms et login dans un fichier nommé 'AUTHORS' à la racine du projet / Add an 'AUTHORS' file with all authors' name, firstname and login at the project root; Fichier manquant/missing file: "  ${CMAKE_SOURCE_DIR}/AUTHORS)
 endif()
+
+###
+# Configuration de cmake et de C
+###
+enable_testing()
+# Use the 2017-2018 C standard with GNU extensions ("99" instead
+# should work too with this skeleton)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -Werror -fanalyzer -fsanitize=undefined -fsanitize-address-use-after-scope")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -fanalyzer -fsanitize-address-use-after-scope")
+
+# Nom des auteurs comme un identifiant C (monoligne alpha)
+execute_process(COMMAND cat AUTHORS WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE AUTHOR_LIST)
+string(STRIP "${AUTHOR_LIST}" AUTHOR_LIST)
+string(MAKE_C_IDENTIFIER "${AUTHOR_LIST}" AUTHOR_LIST)
 
 #######
 # Compilation standard avec googletest
 #######
 
-###
-# sur Debian et al, les googletests sont à recompiler
-# sur centOS6, c'est une bibliothèque avec son équivalent de pkg-config
-# sinon, on utilise l'autodetection de Cmake
-###
-if(EXISTS /usr/src/gtest)
-    add_subdirectory(/usr/src/gtest ./gtest)
-else(EXISTS /usr/src/gtest)
-  if(EXISTS /usr/bin/gtest-config)
-    execute_process(COMMAND gtest-config --cppflags --cxxflags OUTPUT_VARIABLE CENTOS_GTEST_CFLAGS)
-    execute_process(COMMAND gtest-config --ldflags --libs OUTPUT_VARIABLE CENTOS_GTEST_LDFLAGS)
-    string(STRIP "${CENTOS_GTEST_CFLAGS}" CENTOS_GTEST_CFLAGS)
-    string(STRIP "${CENTOS_GTEST_LDFLAGS}" CENTOS_GTEST_LDFLAGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CENTOS_GTEST_CFLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CENTOS_GTEST_LDFLAGS} -lgtest_main")
-  else(EXISTS /usr/bin/gtest-config)
-    find_package(GTest REQUIRED)
-    include_directories(${GTEST_INCLUDE_DIRS})
-  endif(EXISTS /usr/bin/gtest-config)
-endif(EXISTS /usr/src/gtest)
-
-##
-# Recherche du répertoire avec les headers python
-##
-execute_process(COMMAND pkg-config --cflags python3 OUTPUT_VARIABLE python_header OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${python_header}")
-# You can use this solution when cmake is updated to 3.12
-#find_package(Python3 COMPONENTS Development)
-#if (Python_Development_FOUND)
-#  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -I${Python_INCLUDE_DIRS}")
-#endif (Python_Development_FOUND)
+find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
 
 ##
 # Si vous utilisé plusieurs fichiers, en plus de mem.c et les autres,
 # pour votre allocateur il faut les ajouter ici
 ##
-add_library(emalloc SHARED src/mem.c src/mem_internals.c src/mem_small.c src/mem_medium.c src/mem_large.c)
-
-##
-# Bibliothèque pour faire des tests en python
-##
-
-add_library(mempy SHARED tests/mempymodule.c)
-target_include_directories(mempy PRIVATE src)
-target_include_directories(mempy PRIVATE ${PYTHON_INCLUDE_DIRS})
-target_link_libraries(mempy emalloc)
-target_link_libraries(mempy ${PYTHON_LIBRARIES})
+add_library(ensimalloc SHARED src/mem.c src/mem_internals.c src/mem_small.c src/mem_medium.c src/mem_large.c)
 
 ##
 # Construction du programme de tests unitaires
 ##
 add_executable(alloctest tests/alloctest.cc tests/test_mark.cc tests/test_generic.cc tests/test_buddy.cc tests/test_run_cpp.cc)
-target_link_libraries(alloctest gtest gtest_main emalloc)
+target_link_libraries(alloctest gtest gtest_main ensimalloc)
 add_test(AllTestsAllocator alloctest)
 
 ##
@@ -88,16 +64,15 @@ add_custom_target(check alloctest)
 # Construction du shell
 ##
 add_executable(memshell src/memshell.c)
-target_link_libraries(memshell emalloc)
+target_link_libraries(memshell ensimalloc)
 
 ##
 # Construction de l'archive
 # inclu le .git si il est là
 ##
-string(REPLACE ";" "_" LOGINS_SANS_POINTVIRGULE "${VARIANTE_LOGINS}")
-set(CPACK_PACKAGE_VERSION_MAJOR "2")
+set(CPACK_PACKAGE_VERSION_MAJOR "3")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH ${LOGINS_SANS_POINTVIRGULE})
+set(CPACK_PACKAGE_VERSION_PATCH "0-${AUTHOR_LIST}")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES
   "~$"
