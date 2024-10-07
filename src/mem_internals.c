@@ -6,7 +6,6 @@
 
 #include "mem_internals.h"
 #include "mem.h"
-#include "utils.h"
 #include <assert.h>
 #include <stdint.h>
 #include <sys/mman.h>
@@ -19,19 +18,41 @@ void *mark_memarea_and_get_user_ptr(void *ptr, unsigned long size, MemKind k) {
   /* ecrire votre code ici */
   // void* = sizeof(void*) == 8bytes
   // getting a tmpPointer even though not necessary
-  void *tmpPtr = ptr;
-  void *tailleLeft = tmpPtr;
-  unsigned long tmpPtrAddressValue = *(unsigned long *)tmpPtr;
-  *(unsigned long *)tailleLeft = size;
-  void *magicLeft = tmpPtr + 1;
-  *(unsigned long *)magicLeft =
-      set_last_n_bits(knuth_mmix_one_round(tmpPtrAddressValue), 2);
-  void *utilizableZone = tmpPtr + 2; // 8o taille + 8o magic
-  void *magicRight = (tmpPtr + size / sizeof(void *)) -
-                     2; // I know that the size is the end so getting the
-                        // pointer of the last part and sustracting make sense
-  void *tailleRight = magicRight + 1;
+  printf("\n[MARK_MEMARE] DEBUG START");
+  printf("\n address pointed by ptr: %p\n", ptr);
+  unsigned long *tmpPtr = (unsigned long *)ptr;
+  // Left part
+  unsigned long *tailleLeft = tmpPtr;
+  *tailleLeft = size;
+  printf("\nsize == %lu\n", size);
+  printf("\nsize inside location == %lu\n", *tailleLeft);
+  unsigned long *magicLeft = tmpPtr + 1;
+  // getting mmix value
+  *magicLeft = knuth_mmix_one_round((unsigned long)tmpPtr);
+  // converting last 2 bits to 1
+  *magicLeft &= ~0b11UL;
+  // doing an and operation to set the k in the last 2 bits setted to 1
+  *magicLeft |= k;
+  // returned
+  unsigned long *utilizableZone = tmpPtr + 2; // 8o taille + 8o magic
+
+  // Right part
+  unsigned long *magicRight =
+      (tmpPtr + (size / sizeof(unsigned long *))) -
+      2; // I know that the size is the end so getting the
+         //
+  *magicRight = knuth_mmix_one_round((unsigned long)tmpPtr);
+  // converting last 2 bits to 1
+  *magicRight &= ~0b11UL;
+  // doing an and operation to set the k in the last 2 bits setted to 1
+  // this is becoming everything more significant = 0 and that's nto what i want
+  // i want xyz......tw 111..1...00
+  *magicRight |= k;
+  // pointer of the last part and sustracting make sense
+  unsigned long *tailleRight = magicRight + 1;
+  *tailleRight = size;
   return utilizableZone;
+  printf("\n[MARK_MEMARE] DEBUG END");
 }
 
 // typedef struct _Alloc {
@@ -41,8 +62,26 @@ void *mark_memarea_and_get_user_ptr(void *ptr, unsigned long size, MemKind k) {
 // } Alloc;
 Alloc mark_check_and_get_alloc(void *ptr) {
   /* ecrire votre code ici */
-  Alloc a = {};
 
+  printf("\n [MARK_CHECK] DEBUG START");
+  Alloc a = {};
+  unsigned long *tmpPtr = (unsigned long *)ptr;
+  unsigned long *tailleLeft = tmpPtr - 2;
+  unsigned long *tailleRight =
+      (tmpPtr - 2) + (*tailleLeft / sizeof(unsigned long *)) - 1;
+  assert(*tailleLeft == *tailleRight);
+  unsigned long *magicLeft = tmpPtr - 1;
+  unsigned long *magicRight =
+      (tmpPtr - 2) + (*tailleLeft / sizeof(unsigned long *)) - 2;
+  assert(*magicLeft == *magicRight);
+  a.ptr = tmpPtr - 2;
+  a.size = *tailleLeft;
+  a.kind = *magicLeft & 0B11UL;
+  printf("\nprinting structure here\n ");
+  printf("printing structure ptr: %p\n ", a.ptr);
+  printf("printing structure size: %d\n ", (int)a.size);
+  printf("printing structure kind: %d\n ", a.kind);
+  printf("\n [MARK_CHECK] DEBUG FINISH");
   return a;
 }
 

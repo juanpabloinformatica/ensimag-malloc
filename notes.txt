@@ -1,0 +1,22 @@
+Tp notes
+ -> basically the goal is remake in a certain way
+    -> malloc : allocate heap memory and return a pointer
+    -> free : remove that allocated memory
+-> Marquage des blocs
+    -> initOfZone
+        -> taille -> 8o 
+        -> magic -> 8o
+    -> finalOfZone
+        -> taille -> 8o 
+        -> magic -> 8o
+    -> taille = initOfZone + [utilisateur + delta] + finalOfZone
+
+-> Calcul magic:
+    -> value = mmix(unsigned long)ptr 
+    -> value |= (1<<2) 
+
+
+
+
+
+
