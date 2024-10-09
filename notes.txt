@@ -13,7 +13,7 @@ Tp notes
 
 -> Calcul magic:
     -> value = mmix(unsigned long)ptr 
-    -> value |= (1<<2) 
+-> first part done
 
 
 
