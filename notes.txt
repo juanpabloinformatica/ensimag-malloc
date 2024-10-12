@@ -18,7 +18,9 @@ Tp notes
     -> Is important to know that the compiler need
        need to know how many bytes it needs to consider
        that's why casting is important
-    -> 
+    -> One of my mistakes was thinking that the 
+        arena.chunkpool has a pointer to the head 
+        but is the head arena.chunkpool so mistake by my side
 
 
 

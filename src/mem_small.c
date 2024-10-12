@@ -17,7 +17,13 @@ void *emalloc_small(unsigned long size) {
     for (int i = 0; i < (bloc / CHUNKSIZE); i++) {
       *tmpHead = (unsigned long *)tmpHead + 12;
       tmpHead += 12;
-    
+    }
+    // 1288 / 96 == 128
+    //(x + 96 )*128
+    //  here the last element has to be in the pos
+    //(x + 96 )*128
+    //  x == address of arena.chunkpool + bloc
+    assert((unsigned long **)arena.chunkpool + 12 * 128 == tmpHead);
   }
   void **firstNode = arena.chunkpool;
   arena.chunkpool = *(void **)firstNode;
