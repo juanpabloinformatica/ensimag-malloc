@@ -10,10 +10,16 @@ Tp notes
         -> taille -> 8o 
         -> magic -> 8o
     -> taille = initOfZone + [utilisateur + delta] + finalOfZone
-
 -> Calcul magic:
-    -> value = mmix(unsigned long)ptr 
--> first part done
+-> mem small
+    -> so what was important to know here
+    -> For writting memory addresses u need to do so
+    -> in a void* variable.
+    -> Is important to know that the compiler need
+       need to know how many bytes it needs to consider
+       that's why casting is important
+    -> 
+
 
 
 
